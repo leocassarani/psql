@@ -46,7 +46,44 @@ func IntLiteral(n int) intLiteral {
 
 type intLiteral int
 
-// ToSQLExpr returns the SQL string representation of the integer literal.
 func (i intLiteral) ToSQLExpr() string {
 	return strconv.Itoa(int(i))
+}
+
+// Plus returns an Expression representing the sum of Expressions a and b.
+func Plus(a, b Expression) binaryOp {
+	return binaryOp{a, b, plus}
+}
+
+// Minus returns an Expression representing the subtraction of Expression b from a.
+func Minus(a, b Expression) binaryOp {
+	return binaryOp{a, b, minus}
+}
+
+// Times returns an Expression representing the multiplication of Expression a and b.
+func Times(a, b Expression) binaryOp {
+	return binaryOp{a, b, times}
+}
+
+// Divide returns an Expression representing the division of Expression a and b.
+func Divide(a, b Expression) binaryOp {
+	return binaryOp{a, b, divide}
+}
+
+type binaryOpType string
+
+const (
+	plus   binaryOpType = "+"
+	minus               = "-"
+	times               = "*"
+	divide              = "/"
+)
+
+type binaryOp struct {
+	a, b   Expression
+	opType binaryOpType
+}
+
+func (o binaryOp) ToSQLExpr() string {
+	return fmt.Sprintf("%s %s %s", o.a.ToSQLExpr(), o.opType, o.b.ToSQLExpr())
 }

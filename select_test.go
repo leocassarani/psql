@@ -23,6 +23,15 @@ func TestSelectQuery(t *testing.T) {
 			),
 			"SELECT 123, 42",
 		},
+		{
+			Select(
+				Plus(IntLiteral(9), IntLiteral(33)),
+				Minus(IntLiteral(123), IntLiteral(81)),
+				Times(IntLiteral(14), IntLiteral(3)),
+				Divide(IntLiteral(714), IntLiteral(17)),
+			),
+			"SELECT 9 + 33, 123 - 81, 14 * 3, 714 / 17",
+		},
 	}
 
 	for i, tc := range cases {
