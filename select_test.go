@@ -45,6 +45,12 @@ func TestSelectQuery(t *testing.T) {
 			),
 			"SELECT (7 + ((1 + 10) * (25 + 50)))",
 		},
+		{
+			Select(
+				TableColumn("users", "name"),
+			),
+			`SELECT "name" FROM "users"`,
+		},
 	}
 
 	for i, tc := range cases {

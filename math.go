@@ -17,6 +17,10 @@ func (i intLiteral) ToSQLExpr() string {
 	return strconv.Itoa(int(i))
 }
 
+func (i intLiteral) Relations() []string {
+	return nil
+}
+
 // Plus returns an Expression representing the addition of Expressions a and b.
 func Plus(a, b Expression) binaryOp {
 	return binaryOp{a, b, plus}
@@ -65,4 +69,11 @@ type binaryOp struct {
 
 func (o binaryOp) ToSQLExpr() string {
 	return fmt.Sprintf("(%s %s %s)", o.a.ToSQLExpr(), o.opType, o.b.ToSQLExpr())
+}
+
+func (o binaryOp) Relations() []string {
+	var rels []string
+	rels = append(rels, o.a.Relations()...)
+	rels = append(rels, o.b.Relations()...)
+	return rels
 }
