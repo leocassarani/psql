@@ -12,3 +12,21 @@ column names) and parameters (user input) are correctly escaped.
 
 psql is not an ORM; however, it may be used as a more lightweight
 alternative to a full-blown ORM.
+
+## Usage
+
+Use psql to compose your query, then call `ToSQL()` to convert it into
+an SQL string that you can pass into `DB.Query()` or `DB.QueryRow()`.
+
+```go
+query := psql.Select(
+  psql.TableColumn("users", "name"),
+  psql.TableColumn("users", "email"),
+)
+
+// SELECT "name", "email" FROM "users"
+fmt.Println(query.ToSQL())
+
+// Run the query on a database connection.
+db.Query(query.ToSQL())
+```
