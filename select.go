@@ -50,7 +50,7 @@ func (i intLiteral) ToSQLExpr() string {
 	return strconv.Itoa(int(i))
 }
 
-// Plus returns an Expression representing the sum of Expressions a and b.
+// Plus returns an Expression representing the addition of Expressions a and b.
 func Plus(a, b Expression) binaryOp {
 	return binaryOp{a, b, plus}
 }
@@ -70,6 +70,16 @@ func Divide(a, b Expression) binaryOp {
 	return binaryOp{a, b, divide}
 }
 
+// Modulo returns an Expression representing the modulo of Expression a and b.
+func Modulo(a, b Expression) binaryOp {
+	return binaryOp{a, b, modulo}
+}
+
+// Modulo returns an Expression representing the exponentiation of Expression a and b.
+func Pow(a, b Expression) binaryOp {
+	return binaryOp{a, b, pow}
+}
+
 type binaryOpType string
 
 const (
@@ -77,6 +87,8 @@ const (
 	minus               = "-"
 	times               = "*"
 	divide              = "/"
+	modulo              = "%"
+	pow                 = "^"
 )
 
 type binaryOp struct {

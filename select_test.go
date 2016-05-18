@@ -29,8 +29,10 @@ func TestSelectQuery(t *testing.T) {
 				Minus(IntLiteral(123), IntLiteral(81)),
 				Times(IntLiteral(14), IntLiteral(3)),
 				Divide(IntLiteral(714), IntLiteral(17)),
+				Modulo(IntLiteral(1149), IntLiteral(123)),
+				Pow(IntLiteral(42), IntLiteral(1)),
 			),
-			"SELECT (9 + 33), (123 - 81), (14 * 3), (714 / 17)",
+			"SELECT (9 + 33), (123 - 81), (14 * 3), (714 / 17), (1149 % 123), (42 ^ 1)",
 		},
 		{
 			Select(
