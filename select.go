@@ -12,15 +12,13 @@ import (
 // "SELECT" and "FROM".
 func Select(exprs ...Expression) SelectQuery {
 	return SelectQuery{
-		sel:  selectClause{exprs},
-		from: fromClause{exprs},
+		sel: selectClause{exprs},
 	}
 }
 
 // A SelectQuery represents a SELECT query with all its clauses.
 type SelectQuery struct {
 	sel     selectClause
-	from    fromClause
 	orderBy orderByClause
 }
 
@@ -53,9 +51,31 @@ func (s SelectQuery) ToSQL() string {
 func (s SelectQuery) clauses() []Clause {
 	return []Clause{
 		s.sel,
-		s.from,
+		s.from(),
 		s.orderBy,
 	}
+}
+
+func (s SelectQuery) from() Clause {
+	rels := make([]string, 0)
+	set := make(map[string]struct{})
+
+	for _, rel := range s.relations() {
+		// Have we seen this relation before?
+		if _, ok := set[rel]; !ok {
+			set[rel] = struct{}{}
+			rels = append(rels, rel)
+		}
+	}
+
+	return fromClause{rels}
+}
+
+func (s SelectQuery) relations() []string {
+	var rels []string
+	rels = append(rels, s.sel.Relations()...)
+	rels = append(rels, s.orderBy.Relations()...)
+	return rels
 }
 
 // Clause is the interface that represents the individual components of
@@ -84,29 +104,24 @@ func (s selectClause) ToSQLClause() string {
 	return fmt.Sprintf("SELECT %s", strings.Join(args, ", "))
 }
 
+func (s selectClause) Relations() []string {
+	var rels []string
+	for _, expr := range s.exprs {
+		rels = append(rels, expr.Relations()...)
+	}
+	return rels
+}
+
 type fromClause struct {
-	exprs []Expression
+	rels []string
 }
 
 func (f fromClause) ToSQLClause() string {
-	rels := make([]string, 0)
-	set := make(map[string]struct{})
-
-	for _, expr := range f.exprs {
-		for _, rel := range expr.Relations() {
-			// Have we seen this relation before?
-			if _, ok := set[rel]; !ok {
-				set[rel] = struct{}{}
-				rels = append(rels, rel)
-			}
-		}
-	}
-
-	if len(rels) == 0 {
+	if len(f.rels) == 0 {
 		return ""
 	}
 
-	return fmt.Sprintf("FROM %s", strings.Join(rels, ", "))
+	return fmt.Sprintf("FROM %s", strings.Join(f.rels, ", "))
 }
 
 type orderByClause struct {
@@ -124,6 +139,14 @@ func (o orderByClause) ToSQLClause() string {
 	}
 
 	return fmt.Sprintf("ORDER BY %s", strings.Join(parts, ", "))
+}
+
+func (o orderByClause) Relations() []string {
+	var rels []string
+	for _, expr := range o.exprs {
+		rels = append(rels, expr.Relations()...)
+	}
+	return rels
 }
 
 // AscendingOrder returns a new OrderExpression specifying that the results
@@ -155,6 +178,10 @@ type OrderExpression struct {
 
 func (o OrderExpression) ToSQLOrder() string {
 	return fmt.Sprintf("%s %s", o.column.ToSQLExpr(), o.direction)
+}
+
+func (o OrderExpression) Relations() []string {
+	return o.column.Relations()
 }
 
 // Expression is the interface that represents any SQL expression that
