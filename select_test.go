@@ -6,7 +6,24 @@ func TestSelectQuery(t *testing.T) {
 	cases := []struct {
 		query SelectQuery
 		sql   string
-	}{}
+	}{
+		{
+			Select(),
+			"",
+		},
+		{
+			Select(
+				IntLiteral(123),
+			),
+			"SELECT 123",
+		},
+		{
+			Select(
+				IntLiteral(123), IntLiteral(42),
+			),
+			"SELECT 123, 42",
+		},
+	}
 
 	for i, tc := range cases {
 		got := tc.query.ToSQL()
