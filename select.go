@@ -149,15 +149,15 @@ func (o orderByClause) Relations() []string {
 	return rels
 }
 
-// AscendingOrder returns a new OrderExpression specifying that the results
+// Ascending returns a new OrderExpression specifying that the results
 // of the query must be ordered by the given column in ascending order.
-func AscendingOrder(column tableColumn) OrderExpression {
+func Ascending(column tableColumn) OrderExpression {
 	return OrderExpression{column, asc}
 }
 
-// AscendingOrder returns a new OrderExpression specifying that the results
+// Descending returns a new OrderExpression specifying that the results
 // of the query must be ordered by the given column in descending order.
-func DescendingOrder(column tableColumn) OrderExpression {
+func Descending(column tableColumn) OrderExpression {
 	return OrderExpression{column, desc}
 }
 

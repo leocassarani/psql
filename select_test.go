@@ -64,8 +64,8 @@ func TestSelectQuery(t *testing.T) {
 			Select(
 				TableColumn("users", "name"),
 			).OrderBy(
-				DescendingOrder(TableColumn("users", "height")),
-				AscendingOrder(TableColumn("users", "name")),
+				Descending(TableColumn("users", "height")),
+				Ascending(TableColumn("users", "name")),
 			),
 			`SELECT "name" FROM "users" ORDER BY "height" DESC, "name" ASC`,
 		},
@@ -73,7 +73,7 @@ func TestSelectQuery(t *testing.T) {
 			Select(
 				TableColumn("users", "name"),
 			).OrderBy(
-				AscendingOrder(TableColumn("animals", "weight")),
+				Ascending(TableColumn("animals", "weight")),
 			),
 			`SELECT "name" FROM "users", "animals" ORDER BY "weight" ASC`,
 		},
