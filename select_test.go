@@ -48,8 +48,16 @@ func TestSelectQuery(t *testing.T) {
 		{
 			Select(
 				TableColumn("users", "name"),
+				TableColumn("users", "email"),
 			),
-			`SELECT "name" FROM "users"`,
+			`SELECT "name", "email" FROM "users"`,
+		},
+		{
+			Select(
+				TableColumn("users", "name"),
+				TableColumn("animals", "species"),
+			),
+			`SELECT "name", "species" FROM "users", "animals"`,
 		},
 	}
 
