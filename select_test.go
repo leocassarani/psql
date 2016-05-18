@@ -30,7 +30,18 @@ func TestSelectQuery(t *testing.T) {
 				Times(IntLiteral(14), IntLiteral(3)),
 				Divide(IntLiteral(714), IntLiteral(17)),
 			),
-			"SELECT 9 + 33, 123 - 81, 14 * 3, 714 / 17",
+			"SELECT (9 + 33), (123 - 81), (14 * 3), (714 / 17)",
+		},
+		{
+			Select(
+				Plus(
+					IntLiteral(7), Times(
+						Plus(IntLiteral(1), IntLiteral(10)),
+						Plus(IntLiteral(25), IntLiteral(50)),
+					),
+				),
+			),
+			"SELECT (7 + ((1 + 10) * (25 + 50)))",
 		},
 	}
 

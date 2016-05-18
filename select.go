@@ -85,5 +85,5 @@ type binaryOp struct {
 }
 
 func (o binaryOp) ToSQLExpr() string {
-	return fmt.Sprintf("%s %s %s", o.a.ToSQLExpr(), o.opType, o.b.ToSQLExpr())
+	return fmt.Sprintf("(%s %s %s)", o.a.ToSQLExpr(), o.opType, o.b.ToSQLExpr())
 }
