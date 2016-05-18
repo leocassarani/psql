@@ -60,6 +60,15 @@ func TestSelectQuery(t *testing.T) {
 			),
 			`SELECT "name", "species" FROM "users", "animals"`,
 		},
+		{
+			Select(
+				TableColumn("users", "name"),
+			).OrderBy(
+				DescendingOrder(TableColumn("users", "height")),
+				AscendingOrder(TableColumn("users", "name")),
+			),
+			`SELECT "name" FROM "users" ORDER BY "height" DESC, "name" ASC`,
+		},
 	}
 
 	for i, tc := range cases {

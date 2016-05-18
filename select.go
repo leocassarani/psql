@@ -12,15 +12,24 @@ import (
 // "SELECT" and "FROM".
 func Select(exprs ...Expression) SelectQuery {
 	return SelectQuery{
-		selectClause{exprs},
-		fromClause{exprs},
+		sel:  selectClause{exprs},
+		from: fromClause{exprs},
 	}
 }
 
 // A SelectQuery represents a SELECT query with all its clauses.
 type SelectQuery struct {
-	selectClause selectClause
-	fromClause   fromClause
+	sel     selectClause
+	from    fromClause
+	orderBy orderByClause
+}
+
+// OrderBy returns a copy of the SelectQuery s with an additional ORDER BY
+// clause containing the args provided. If an ORDER BY clause was already
+// present, this operation will overwrite it.
+func (s SelectQuery) OrderBy(exprs ...OrderExpression) SelectQuery {
+	s.orderBy = orderByClause{exprs}
+	return s
 }
 
 // ToSQL returns a string containing the full SQL query version of the
@@ -43,8 +52,9 @@ func (s SelectQuery) ToSQL() string {
 
 func (s SelectQuery) clauses() []Clause {
 	return []Clause{
-		s.selectClause,
-		s.fromClause,
+		s.sel,
+		s.from,
+		s.orderBy,
 	}
 }
 
@@ -97,6 +107,54 @@ func (f fromClause) ToSQLClause() string {
 	}
 
 	return fmt.Sprintf("FROM %s", strings.Join(rels, ", "))
+}
+
+type orderByClause struct {
+	exprs []OrderExpression
+}
+
+func (o orderByClause) ToSQLClause() string {
+	if len(o.exprs) == 0 {
+		return ""
+	}
+
+	parts := make([]string, len(o.exprs))
+	for i, expr := range o.exprs {
+		parts[i] = expr.ToSQLOrder()
+	}
+
+	return fmt.Sprintf("ORDER BY %s", strings.Join(parts, ", "))
+}
+
+// AscendingOrder returns a new OrderExpression specifying that the results
+// of the query must be ordered by the given column in ascending order.
+func AscendingOrder(column tableColumn) OrderExpression {
+	return OrderExpression{column, asc}
+}
+
+// AscendingOrder returns a new OrderExpression specifying that the results
+// of the query must be ordered by the given column in descending order.
+func DescendingOrder(column tableColumn) OrderExpression {
+	return OrderExpression{column, desc}
+}
+
+type orderDirection string
+
+const (
+	asc  orderDirection = "ASC"
+	desc                = "DESC"
+)
+
+// An OrderExpression is each individual component of a SELECT query's
+// ORDER BY clause, specifying that the results of the query must be
+// sorted by a specific column in a specific direction.
+type OrderExpression struct {
+	column    tableColumn
+	direction orderDirection
+}
+
+func (o OrderExpression) ToSQLOrder() string {
+	return fmt.Sprintf("%s %s", o.column.ToSQLExpr(), o.direction)
 }
 
 // Expression is the interface that represents any SQL expression that
