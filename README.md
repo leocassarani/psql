@@ -1,4 +1,4 @@
-# psql
+# psql [![Build Status](https://travis-ci.org/leocassarani/psql.svg?branch=master)](https://travis-ci.org/leocassarani/psql)
 
 psql is a PostgreSQL query builder for Go.
 
