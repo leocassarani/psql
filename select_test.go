@@ -49,8 +49,9 @@ func TestSelectQuery(t *testing.T) {
 			Select(
 				TableColumn("users", "name"),
 				TableColumn("users", "email"),
+				Divide(TableColumn("users", "height"), IntLiteral(100)),
 			),
-			`SELECT "name", "email" FROM "users"`,
+			`SELECT "name", "email", ("height" / 100) FROM "users"`,
 		},
 		{
 			Select(
