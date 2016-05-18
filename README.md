@@ -22,6 +22,8 @@ an SQL string that you can pass into `DB.Query()` or `DB.QueryRow()`.
 query := psql.Select(
   psql.TableColumn("users", "name"),
   psql.TableColumn("users", "email"),
+).OrderBy(
+  psql.Descending(psql.TableColumn("users", "height")),
 )
 
 // SELECT "name", "email" FROM "users"
