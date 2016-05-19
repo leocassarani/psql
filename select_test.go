@@ -100,6 +100,16 @@ func TestSelectQuery(t *testing.T) {
 			),
 			`SELECT "name" FROM "users" ORDER BY (10 / 5) DESC`,
 		},
+		{
+			Select(
+				TableColumn("users", "name"),
+				TableColumn("users", "height"),
+			).GroupBy(
+				TableColumn("users", "name"),
+				TableColumn("users", "height"),
+			),
+			`SELECT "name", "height" FROM "users" GROUP BY "name", "height"`,
+		},
 	}
 
 	for i, tc := range cases {

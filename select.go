@@ -20,13 +20,22 @@ func Select(exprs ...Expression) SelectQuery {
 type SelectQuery struct {
 	sel     selectClause
 	orderBy orderByClause
+	groupBy groupByClause
 }
 
 // OrderBy returns a copy of the SelectQuery s with an additional ORDER BY
-// clause containing the args provided. If an ORDER BY clause was already
-// present, this operation will overwrite it.
+// clause containing the order expressions provided. If an ORDER BY clause
+// was already present, this operation will overwrite it.
 func (s SelectQuery) OrderBy(exprs ...OrderExpression) SelectQuery {
 	s.orderBy = orderByClause{exprs}
+	return s
+}
+
+// GroupBy returnsa copy of the SelectQuery s with an additional GROUP BY
+// clause containing the Expressions provided. If a GROUP BY clause was
+// already present, this operation will overwrite it.
+func (s SelectQuery) GroupBy(exprs ...Expression) SelectQuery {
+	s.groupBy = groupByClause{exprs}
 	return s
 }
 
@@ -52,6 +61,7 @@ func (s SelectQuery) clauses() []Clause {
 	return []Clause{
 		s.sel,
 		s.from(),
+		s.groupBy,
 		s.orderBy,
 	}
 }
@@ -74,6 +84,7 @@ func (s SelectQuery) from() Clause {
 func (s SelectQuery) relations() []string {
 	var rels []string
 	rels = append(rels, s.sel.Relations()...)
+	rels = append(rels, s.groupBy.Relations()...)
 	rels = append(rels, s.orderBy.Relations()...)
 	return rels
 }
@@ -122,6 +133,31 @@ func (f fromClause) ToSQLClause() string {
 	}
 
 	return fmt.Sprintf("FROM %s", strings.Join(f.rels, ", "))
+}
+
+type groupByClause struct {
+	exprs []Expression
+}
+
+func (g groupByClause) ToSQLClause() string {
+	if len(g.exprs) == 0 {
+		return ""
+	}
+
+	parts := make([]string, len(g.exprs))
+	for i, expr := range g.exprs {
+		parts[i] = expr.ToSQLExpr()
+	}
+
+	return fmt.Sprintf("GROUP BY %s", strings.Join(parts, ", "))
+}
+
+func (g groupByClause) Relations() []string {
+	var rels []string
+	for _, expr := range g.exprs {
+		rels = append(rels, expr.Relations()...)
+	}
+	return rels
 }
 
 type orderByClause struct {
