@@ -62,6 +62,15 @@ func TestSelectQuery(t *testing.T) {
 		},
 		{
 			Select(
+				Avg(TableColumn("users", "age")),
+				Min(TableColumn("animals", "weight")),
+				Max(TableColumn("users", "height")),
+				Sum(TableColumn("animals", "paws")),
+			),
+			`SELECT AVG("age"), MIN("weight"), MAX("height"), SUM("paws") FROM "users", "animals"`,
+		},
+		{
+			Select(
 				AllColumns("users"),
 				AllColumns("animals"),
 			),
@@ -102,13 +111,12 @@ func TestSelectQuery(t *testing.T) {
 		},
 		{
 			Select(
+				Avg(TableColumn("users", "height")),
 				TableColumn("users", "name"),
-				TableColumn("users", "height"),
 			).GroupBy(
 				TableColumn("users", "name"),
-				TableColumn("users", "height"),
 			),
-			`SELECT "name", "height" FROM "users" GROUP BY "name", "height"`,
+			`SELECT AVG("height"), "name" FROM "users" GROUP BY "name"`,
 		},
 	}
 
