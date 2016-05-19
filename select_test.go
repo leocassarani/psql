@@ -84,6 +84,22 @@ func TestSelectQuery(t *testing.T) {
 			),
 			`SELECT "name" FROM "users", "animals" ORDER BY "weight" ASC`,
 		},
+		{
+			Select(
+				TableColumn("users", "name"),
+			).OrderBy(
+				Descending(AllColumns("users")),
+			),
+			`SELECT "name" FROM "users" ORDER BY "users".* DESC`,
+		},
+		{
+			Select(
+				TableColumn("users", "name"),
+			).OrderBy(
+				Descending(Divide(IntLiteral(10), IntLiteral(5))),
+			),
+			`SELECT "name" FROM "users" ORDER BY (10 / 5) DESC`,
+		},
 	}
 
 	for i, tc := range cases {

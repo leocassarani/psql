@@ -150,15 +150,15 @@ func (o orderByClause) Relations() []string {
 }
 
 // Ascending returns a new OrderExpression specifying that the results
-// of the query must be ordered by the given column in ascending order.
-func Ascending(column tableColumn) OrderExpression {
-	return OrderExpression{column, asc}
+// of the query must be ordered by the given Expression in ascending order.
+func Ascending(expr Expression) OrderExpression {
+	return OrderExpression{expr, asc}
 }
 
 // Descending returns a new OrderExpression specifying that the results
-// of the query must be ordered by the given column in descending order.
-func Descending(column tableColumn) OrderExpression {
-	return OrderExpression{column, desc}
+// of the query must be ordered by the given Expression in descending order.
+func Descending(expr Expression) OrderExpression {
+	return OrderExpression{expr, desc}
 }
 
 type orderDirection string
@@ -170,18 +170,18 @@ const (
 
 // An OrderExpression is each individual component of a SELECT query's
 // ORDER BY clause, specifying that the results of the query must be
-// sorted by a specific column in a specific direction.
+// sorted by a given SQL expression.
 type OrderExpression struct {
-	column    tableColumn
+	expr      Expression
 	direction orderDirection
 }
 
 func (o OrderExpression) ToSQLOrder() string {
-	return fmt.Sprintf("%s %s", o.column.ToSQLExpr(), o.direction)
+	return fmt.Sprintf("%s %s", o.expr.ToSQLExpr(), o.direction)
 }
 
 func (o OrderExpression) Relations() []string {
-	return o.column.Relations()
+	return o.expr.Relations()
 }
 
 // Expression is the interface that represents any SQL expression that
