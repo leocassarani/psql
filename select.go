@@ -198,6 +198,25 @@ type Expression interface {
 	Relations() []string
 }
 
+// AllColumns returns an Expression representing all columns in the table.
+func AllColumns(table string) allColumns {
+	return allColumns{table}
+}
+
+type allColumns struct {
+	table string
+}
+
+func (ac allColumns) ToSQLExpr() string {
+	return fmt.Sprintf("%s.*", pq.QuoteIdentifier(ac.table))
+}
+
+func (ac allColumns) Relations() []string {
+	return []string{
+		pq.QuoteIdentifier(ac.table),
+	}
+}
+
 // TableColumn returns an Expression representing the column col of the
 // database table with the given name.
 func TableColumn(table, col string) tableColumn {

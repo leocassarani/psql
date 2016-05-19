@@ -62,6 +62,13 @@ func TestSelectQuery(t *testing.T) {
 		},
 		{
 			Select(
+				AllColumns("users"),
+				AllColumns("animals"),
+			),
+			`SELECT "users".*, "animals".* FROM "users", "animals"`,
+		},
+		{
+			Select(
 				TableColumn("users", "name"),
 			).OrderBy(
 				Descending(TableColumn("users", "height")),
