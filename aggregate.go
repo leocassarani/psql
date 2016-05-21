@@ -40,8 +40,8 @@ type aggregateFunc struct {
 	fnType aggregationType
 }
 
-func (f aggregateFunc) ToSQLExpr() string {
-	return fmt.Sprintf("%s(%s)", f.fnType, f.column.ToSQLExpr())
+func (f aggregateFunc) ToSQLExpr(p *Params) string {
+	return fmt.Sprintf("%s(%s)", f.fnType, f.column.ToSQLExpr(p))
 }
 
 func (f aggregateFunc) Relations() []string {

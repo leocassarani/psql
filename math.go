@@ -13,7 +13,7 @@ func IntLiteral(n int) intLiteral {
 
 type intLiteral int
 
-func (i intLiteral) ToSQLExpr() string {
+func (i intLiteral) ToSQLExpr(*Params) string {
 	return strconv.Itoa(int(i))
 }
 
@@ -67,8 +67,8 @@ type binaryOp struct {
 	opType binaryOpType
 }
 
-func (o binaryOp) ToSQLExpr() string {
-	return fmt.Sprintf("(%s %s %s)", o.a.ToSQLExpr(), o.opType, o.b.ToSQLExpr())
+func (o binaryOp) ToSQLExpr(p *Params) string {
+	return fmt.Sprintf("(%s %s %s)", o.a.ToSQLExpr(p), o.opType, o.b.ToSQLExpr(p))
 }
 
 func (o binaryOp) Relations() []string {

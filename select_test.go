@@ -118,6 +118,13 @@ func TestSelectQuery(t *testing.T) {
 			),
 			`SELECT AVG("height"), "name" FROM "users" GROUP BY "name"`,
 		},
+		{
+			Select(
+				StringLiteral("Hello"),
+				StringLiteral("World"),
+			),
+			`SELECT $1::text, $2::text`,
+		},
 	}
 
 	for i, tc := range cases {

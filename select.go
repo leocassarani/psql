@@ -43,9 +43,10 @@ func (s SelectQuery) GroupBy(exprs ...Expression) SelectQuery {
 // SelectQuery. If the query is empty, an empty string is returned.
 func (s SelectQuery) ToSQL() string {
 	var parts []string
+	params := new(Params)
 
 	for _, clause := range s.clauses() {
-		if part := clause.ToSQLClause(); part != "" {
+		if part := clause.ToSQLClause(params); part != "" {
 			parts = append(parts, part)
 		}
 	}
@@ -95,21 +96,21 @@ func (s SelectQuery) relations() []string {
 // ToSQLClause converts the clause to a string representation. If an empty
 // string is returned, the clause will be omitted from the final SQL query.
 type Clause interface {
-	ToSQLClause() string
+	ToSQLClause(p *Params) string
 }
 
 type selectClause struct {
 	exprs []Expression
 }
 
-func (s selectClause) ToSQLClause() string {
+func (s selectClause) ToSQLClause(p *Params) string {
 	if len(s.exprs) == 0 {
 		return ""
 	}
 
 	args := make([]string, len(s.exprs))
 	for i, expr := range s.exprs {
-		args[i] = expr.ToSQLExpr()
+		args[i] = expr.ToSQLExpr(p)
 	}
 
 	return fmt.Sprintf("SELECT %s", strings.Join(args, ", "))
@@ -127,7 +128,7 @@ type fromClause struct {
 	rels []string
 }
 
-func (f fromClause) ToSQLClause() string {
+func (f fromClause) ToSQLClause(*Params) string {
 	if len(f.rels) == 0 {
 		return ""
 	}
@@ -139,14 +140,14 @@ type groupByClause struct {
 	exprs []Expression
 }
 
-func (g groupByClause) ToSQLClause() string {
+func (g groupByClause) ToSQLClause(p *Params) string {
 	if len(g.exprs) == 0 {
 		return ""
 	}
 
 	parts := make([]string, len(g.exprs))
 	for i, expr := range g.exprs {
-		parts[i] = expr.ToSQLExpr()
+		parts[i] = expr.ToSQLExpr(p)
 	}
 
 	return fmt.Sprintf("GROUP BY %s", strings.Join(parts, ", "))
@@ -164,14 +165,14 @@ type orderByClause struct {
 	exprs []OrderExpression
 }
 
-func (o orderByClause) ToSQLClause() string {
+func (o orderByClause) ToSQLClause(p *Params) string {
 	if len(o.exprs) == 0 {
 		return ""
 	}
 
 	parts := make([]string, len(o.exprs))
 	for i, expr := range o.exprs {
-		parts[i] = expr.ToSQLOrder()
+		parts[i] = expr.ToSQLOrder(p)
 	}
 
 	return fmt.Sprintf("ORDER BY %s", strings.Join(parts, ", "))
@@ -212,8 +213,8 @@ type OrderExpression struct {
 	direction orderDirection
 }
 
-func (o OrderExpression) ToSQLOrder() string {
-	return fmt.Sprintf("%s %s", o.expr.ToSQLExpr(), o.direction)
+func (o OrderExpression) ToSQLOrder(p *Params) string {
+	return fmt.Sprintf("%s %s", o.expr.ToSQLExpr(p), o.direction)
 }
 
 func (o OrderExpression) Relations() []string {
@@ -230,7 +231,7 @@ func (o OrderExpression) Relations() []string {
 // Relations returns a slice of strings corresponding to the (quoted)
 // names of all relations used by the Expression.
 type Expression interface {
-	ToSQLExpr() string
+	ToSQLExpr(*Params) string
 	Relations() []string
 }
 
@@ -243,7 +244,7 @@ type allColumns struct {
 	table string
 }
 
-func (ac allColumns) ToSQLExpr() string {
+func (ac allColumns) ToSQLExpr(*Params) string {
 	return fmt.Sprintf("%s.*", pq.QuoteIdentifier(ac.table))
 }
 
@@ -263,7 +264,7 @@ type tableColumn struct {
 	table, column string
 }
 
-func (tc tableColumn) ToSQLExpr() string {
+func (tc tableColumn) ToSQLExpr(*Params) string {
 	return pq.QuoteIdentifier(tc.column)
 }
 
@@ -271,4 +272,27 @@ func (tc tableColumn) Relations() []string {
 	return []string{
 		pq.QuoteIdentifier(tc.table),
 	}
+}
+
+type Params struct {
+	counter int
+}
+
+func (p *Params) Next() string {
+	p.counter++
+	return fmt.Sprintf("$%d", p.counter)
+}
+
+func StringLiteral(str string) stringLiteral {
+	return stringLiteral(str)
+}
+
+type stringLiteral string
+
+func (s stringLiteral) ToSQLExpr(params *Params) string {
+	return fmt.Sprintf("%s::text", params.Next())
+}
+
+func (stringLiteral) Relations() []string {
+	return nil
 }
