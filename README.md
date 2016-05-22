@@ -27,7 +27,7 @@ query := psql.Select(
 )
 
 // SELECT "name", "email" FROM "users"
-fmt.Println(query.ToSQL())
+fmt.Println(query.ToSQL(), query.Bindings()...)
 
 // Run the query on a database connection.
 db.Query(query.ToSQL())

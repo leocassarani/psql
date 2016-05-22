@@ -23,7 +23,7 @@ func main() {
 		psql.Descending(psql.TableColumn("users", "height")),
 	)
 
-	rows, err := db.Query(query.ToSQL())
+	rows, err := db.Query(query.ToSQL(), query.Bindings()...)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,8 +1,11 @@
 package psql
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
-func TestSelectQuery(t *testing.T) {
+func TestSelectQuerySQL(t *testing.T) {
 	cases := []struct {
 		query SelectQuery
 		sql   string
@@ -118,19 +121,41 @@ func TestSelectQuery(t *testing.T) {
 			),
 			`SELECT AVG("height"), "name" FROM "users" GROUP BY "name"`,
 		},
-		{
-			Select(
-				StringLiteral("Hello"),
-				StringLiteral("World"),
-			),
-			`SELECT $1::text, $2::text`,
-		},
 	}
 
 	for i, tc := range cases {
 		got := tc.query.ToSQL()
 		if got != tc.sql {
 			t.Errorf("test case %d: expected %q, got %q", i+1, tc.sql, got)
+		}
+	}
+}
+
+func TestSelectQueryBindings(t *testing.T) {
+	cases := []struct {
+		query    SelectQuery
+		sql      string
+		bindings []interface{}
+	}{
+		{
+			Select(
+				StringLiteral("Hello"),
+				StringLiteral("World"),
+			),
+			`SELECT $1::text, $2::text`,
+			[]interface{}{"Hello", "World"},
+		},
+	}
+
+	for i, tc := range cases {
+		sql := tc.query.ToSQL()
+		if sql != tc.sql {
+			t.Errorf("test case %d: expected %q, got %q", i+1, tc.sql, sql)
+		}
+
+		bindings := tc.query.Bindings()
+		if !reflect.DeepEqual(bindings, tc.bindings) {
+			t.Errorf("test case %d: expected %v, got %v", i+1, tc.bindings, bindings)
 		}
 	}
 }

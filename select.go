@@ -12,7 +12,8 @@ import (
 // "SELECT" and "FROM".
 func Select(exprs ...Expression) SelectQuery {
 	return SelectQuery{
-		sel: selectClause{exprs},
+		sel:    selectClause{exprs},
+		params: new(Params),
 	}
 }
 
@@ -21,6 +22,8 @@ type SelectQuery struct {
 	sel     selectClause
 	orderBy orderByClause
 	groupBy groupByClause
+
+	params *Params
 }
 
 // OrderBy returns a copy of the SelectQuery s with an additional ORDER BY
@@ -43,10 +46,9 @@ func (s SelectQuery) GroupBy(exprs ...Expression) SelectQuery {
 // SelectQuery. If the query is empty, an empty string is returned.
 func (s SelectQuery) ToSQL() string {
 	var parts []string
-	params := new(Params)
 
 	for _, clause := range s.clauses() {
-		if part := clause.ToSQLClause(params); part != "" {
+		if part := clause.ToSQLClause(s.params); part != "" {
 			parts = append(parts, part)
 		}
 	}
@@ -88,6 +90,10 @@ func (s SelectQuery) relations() []string {
 	rels = append(rels, s.groupBy.Relations()...)
 	rels = append(rels, s.orderBy.Relations()...)
 	return rels
+}
+
+func (s SelectQuery) Bindings() []interface{} {
+	return s.params.Values()
 }
 
 // Clause is the interface that represents the individual components of
@@ -276,11 +282,21 @@ func (tc tableColumn) Relations() []string {
 
 type Params struct {
 	counter int
+	values  []interface{}
 }
 
-func (p *Params) Next() string {
+func (p *Params) Add(value interface{}) string {
+	p.values = append(p.values, value)
+	return p.next()
+}
+
+func (p *Params) next() string {
 	p.counter++
 	return fmt.Sprintf("$%d", p.counter)
+}
+
+func (p *Params) Values() []interface{} {
+	return p.values
 }
 
 func StringLiteral(str string) stringLiteral {
@@ -290,7 +306,8 @@ func StringLiteral(str string) stringLiteral {
 type stringLiteral string
 
 func (s stringLiteral) ToSQLExpr(params *Params) string {
-	return fmt.Sprintf("%s::text", params.Next())
+	marker := params.Add(string(s))
+	return fmt.Sprintf("%s::text", marker)
 }
 
 func (stringLiteral) Relations() []string {
