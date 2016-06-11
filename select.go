@@ -13,7 +13,7 @@ import (
 func Select(exprs ...Expression) SelectQuery {
 	return SelectQuery{
 		sel:    selectClause{exprs},
-		params: new(Params),
+		params: newParams(),
 	}
 }
 
@@ -34,7 +34,7 @@ func (s SelectQuery) OrderBy(exprs ...OrderExpression) SelectQuery {
 	return s
 }
 
-// GroupBy returnsa copy of the SelectQuery s with an additional GROUP BY
+// GroupBy returns a copy of the SelectQuery s with an additional GROUP BY
 // clause containing the Expressions provided. If a GROUP BY clause was
 // already present, this operation will overwrite it.
 func (s SelectQuery) GroupBy(exprs ...Expression) SelectQuery {
@@ -92,8 +92,14 @@ func (s SelectQuery) relations() []string {
 	return rels
 }
 
-func (s SelectQuery) Bindings() []interface{} {
-	return s.params.Values()
+// Bindings returns a slice of arguments that can be unpacked and passed
+// into the Query and QueryRow methods of the database/sql package.
+//
+// Any variadic arguments passed into Bindings will be used to replace
+// user-supplied parameters in the SELECT query, in the same order as
+// they appear in the query.
+func (s SelectQuery) Bindings(inputs ...interface{}) []interface{} {
+	return s.params.Values(inputs)
 }
 
 // Clause is the interface that represents the individual components of
@@ -280,13 +286,24 @@ func (tc tableColumn) Relations() []string {
 	}
 }
 
+func newParams() *Params {
+	return &Params{
+		values: make(map[int]interface{}),
+	}
+}
+
 type Params struct {
 	counter int
-	values  []interface{}
+	values  map[int]interface{}
 }
 
 func (p *Params) Add(value interface{}) string {
-	p.values = append(p.values, value)
+	marker := p.next()
+	p.values[p.counter] = value
+	return marker
+}
+
+func (p *Params) New() string {
 	return p.next()
 }
 
@@ -295,8 +312,19 @@ func (p *Params) next() string {
 	return fmt.Sprintf("$%d", p.counter)
 }
 
-func (p *Params) Values() []interface{} {
-	return p.values
+func (p *Params) Values(inputs []interface{}) []interface{} {
+	var values []interface{}
+
+	for i := 1; i <= p.counter; i++ {
+		if val, ok := p.values[i]; ok {
+			values = append(values, val)
+		} else if len(inputs) > 0 {
+			values = append(values, inputs[0])
+			inputs = inputs[1:]
+		}
+	}
+
+	return values
 }
 
 func StringLiteral(str string) stringLiteral {
@@ -311,5 +339,21 @@ func (s stringLiteral) ToSQLExpr(params *Params) string {
 }
 
 func (stringLiteral) Relations() []string {
+	return nil
+}
+
+func StringParam() freeParam {
+	return freeParam{"text"}
+}
+
+type freeParam struct {
+	Type string
+}
+
+func (p freeParam) ToSQLExpr(params *Params) string {
+	return fmt.Sprintf("%s::%s", params.New(), p.Type)
+}
+
+func (p freeParam) Relations() []string {
 	return nil
 }

@@ -133,7 +133,9 @@ func TestSelectQuerySQL(t *testing.T) {
 
 func TestSelectQueryBindings(t *testing.T) {
 	cases := []struct {
-		query    SelectQuery
+		query  SelectQuery
+		inputs []interface{}
+
 		sql      string
 		bindings []interface{}
 	}{
@@ -142,8 +144,20 @@ func TestSelectQueryBindings(t *testing.T) {
 				StringLiteral("Hello"),
 				StringLiteral("World"),
 			),
+			[]interface{}{},
+
 			`SELECT $1::text, $2::text`,
 			[]interface{}{"Hello", "World"},
+		},
+		{
+			Select(
+				StringLiteral("Hello"),
+				StringParam(),
+			),
+			[]interface{}{"Joe"},
+
+			`SELECT $1::text, $2::text`,
+			[]interface{}{"Hello", "Joe"},
 		},
 	}
 
@@ -153,7 +167,7 @@ func TestSelectQueryBindings(t *testing.T) {
 			t.Errorf("test case %d: expected %q, got %q", i+1, tc.sql, sql)
 		}
 
-		bindings := tc.query.Bindings()
+		bindings := tc.query.Bindings(tc.inputs...)
 		if !reflect.DeepEqual(bindings, tc.bindings) {
 			t.Errorf("test case %d: expected %v, got %v", i+1, tc.bindings, bindings)
 		}
