@@ -327,6 +327,11 @@ func (p *Params) Values(inputs []interface{}) []interface{} {
 	return values
 }
 
+// StringLiteral returns a text literal that will be replaced with str
+// when the query is executed. For security reasons, the contents of str
+// are not directly interpolated into the query's SQL representation.
+// Instead, a marker such as $1 is used, and the value of str is injected
+// into the appropriate position when the Bindings() method is called.
 func StringLiteral(str string) stringLiteral {
 	return stringLiteral(str)
 }
@@ -348,6 +353,7 @@ const (
 	TextDataType DataType = "text"
 )
 
+// StringParam returns a free (unbound) parameter using the "text" type.
 func StringParam() freeParam {
 	return freeParam{TextDataType}
 }
