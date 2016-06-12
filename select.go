@@ -340,30 +340,30 @@ type stringLiteral string
 
 func (s stringLiteral) ToSQLExpr(params *Params) string {
 	marker := params.Add(string(s))
-	return fmt.Sprintf("%s::%s", marker, TextDataType)
+	return fmt.Sprintf("%s::%s", marker, textType)
 }
 
 func (stringLiteral) Relations() []string {
 	return nil
 }
 
-type DataType string
+type dataType string
 
 const (
-	TextDataType DataType = "text"
+	textType dataType = "text"
 )
 
 // StringParam returns a free (unbound) parameter using the "text" type.
 func StringParam() freeParam {
-	return freeParam{TextDataType}
+	return freeParam{textType}
 }
 
 type freeParam struct {
-	Type DataType
+	dataType dataType
 }
 
 func (p freeParam) ToSQLExpr(params *Params) string {
-	return fmt.Sprintf("%s::%s", params.New(), p.Type)
+	return fmt.Sprintf("%s::%s", params.New(), p.dataType)
 }
 
 func (p freeParam) Relations() []string {
