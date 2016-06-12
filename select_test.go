@@ -121,6 +121,17 @@ func TestSelectQuerySQL(t *testing.T) {
 			),
 			`SELECT AVG("height"), "name" FROM "users" GROUP BY "name"`,
 		},
+		{
+			Select(
+				Eq(IntLiteral(42), IntLiteral(42)),
+				Neq(IntLiteral(42), IntLiteral(21)),
+				Lt(IntLiteral(21), IntLiteral(42)),
+				Lte(IntLiteral(42), IntLiteral(42)),
+				Gt(IntLiteral(42), IntLiteral(21)),
+				Gte(IntLiteral(42), IntLiteral(42)),
+			),
+			`SELECT (42 = 42), (42 <> 21), (21 < 42), (42 <= 42), (42 > 21), (42 >= 42)`,
+		},
 	}
 
 	for i, tc := range cases {
