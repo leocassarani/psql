@@ -132,6 +132,13 @@ func TestSelectQuerySQL(t *testing.T) {
 			),
 			`SELECT (42 = 42), (42 <> 21), (21 < 42), (42 <= 42), (42 > 21), (42 >= 42)`,
 		},
+		{
+			Select(
+				TableColumn("users", "name"),
+				Gte(TableColumn("users", "height"), IntLiteral(180)),
+			),
+			`SELECT "name", ("height" >= 180) FROM "users"`,
+		},
 	}
 
 	for i, tc := range cases {
