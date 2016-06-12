@@ -124,18 +124,18 @@ func TestSelectQuerySQL(t *testing.T) {
 		{
 			Select(
 				Eq(IntLiteral(42), IntLiteral(42)),
-				Neq(IntLiteral(42), IntLiteral(21)),
-				Lt(IntLiteral(21), IntLiteral(42)),
-				Lte(IntLiteral(42), IntLiteral(42)),
-				Gt(IntLiteral(42), IntLiteral(21)),
-				Gte(IntLiteral(42), IntLiteral(42)),
+				NotEq(IntLiteral(42), IntLiteral(21)),
+				LessThan(IntLiteral(21), IntLiteral(42)),
+				LessThanOrEq(IntLiteral(42), IntLiteral(42)),
+				GreaterThan(IntLiteral(42), IntLiteral(21)),
+				GreaterThanOrEq(IntLiteral(42), IntLiteral(42)),
 			),
 			`SELECT (42 = 42), (42 <> 21), (21 < 42), (42 <= 42), (42 > 21), (42 >= 42)`,
 		},
 		{
 			Select(
 				TableColumn("users", "name"),
-				Gte(TableColumn("users", "height"), IntLiteral(180)),
+				GreaterThanOrEq(TableColumn("users", "height"), IntLiteral(180)),
 			),
 			`SELECT "name", ("height" >= 180) FROM "users"`,
 		},

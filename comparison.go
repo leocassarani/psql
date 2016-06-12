@@ -7,28 +7,31 @@ func Eq(a, b Expression) comparison {
 	return comparison{a, b, eq}
 }
 
-// Neq returns an Expression representing the inequality comparison between a and b.
-func Neq(a, b Expression) comparison {
+// NotEq returns an Expression representing the inequality comparison between a and b.
+func NotEq(a, b Expression) comparison {
 	return comparison{a, b, neq}
 }
 
-// Lt returns an Expression representing the less-than comparison between a and b.
-func Lt(a, b Expression) comparison {
+// LessThan returns an Expression representing the less-than comparison between a and b.
+func LessThan(a, b Expression) comparison {
 	return comparison{a, b, lt}
 }
 
-// Lte returns an Expression representing the less-than-or-equal-to comparison between a and b.
-func Lte(a, b Expression) comparison {
+// LessThanOrEq returns an Expression representing the less-than-or-equal-to
+// comparison between a and b.
+func LessThanOrEq(a, b Expression) comparison {
 	return comparison{a, b, lte}
 }
 
-// Gt returns an Expression representing the greater-than comparison between a and b.
-func Gt(a, b Expression) comparison {
+// GreaterThan returns an Expression representing the greater-than comparison
+// between a and b.
+func GreaterThan(a, b Expression) comparison {
 	return comparison{a, b, gt}
 }
 
-// Gte returns an Expression representing the greater-than-or-equal-to comparison between a and b.
-func Gte(a, b Expression) comparison {
+// GreaterThanOrEq returns an Expression representing the greater-than-or-equal-to
+// comparison between a and b.
+func GreaterThanOrEq(a, b Expression) comparison {
 	return comparison{a, b, gte}
 }
 
