@@ -22,12 +22,14 @@ an SQL string that you can pass into `DB.Query()` or `DB.QueryRow()`.
 query := psql.Select(
   psql.TableColumn("users", "name"),
   psql.TableColumn("users", "email"),
+).Where(
+  psql.NotEq(psql.TableColumn("users", "name"), psql.StringParam()),
 ).OrderBy(
   psql.Descending(psql.TableColumn("users", "height")),
 )
 
-// SELECT "name", "email" FROM "users"
-fmt.Println(query.ToSQL(), query.Bindings()...)
+// SELECT "name", "email" FROM "users" WHERE "name" <> 'Joe' ORDER BY "height"
+fmt.Println(query.ToSQL(), query.Bindings("Joe")...)
 
 // Run the query on a database connection.
 db.Query(query.ToSQL())

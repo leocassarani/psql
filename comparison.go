@@ -51,6 +51,10 @@ type comparison struct {
 	compType comparisonType
 }
 
+func (c comparison) ToSQLBoolean(p *Params) string {
+	return c.ToSQLExpr(p)
+}
+
 func (c comparison) ToSQLExpr(p *Params) string {
 	return fmt.Sprintf("(%s %s %s)", c.a.ToSQLExpr(p), c.compType, c.b.ToSQLExpr(p))
 }

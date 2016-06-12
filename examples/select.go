@@ -19,11 +19,13 @@ func main() {
 	query := psql.Select(
 		psql.TableColumn("users", "name"),
 		psql.TableColumn("users", "email"),
+	).Where(
+		psql.NotEq(psql.TableColumn("users", "name"), psql.StringParam()),
 	).OrderBy(
 		psql.Descending(psql.TableColumn("users", "height")),
 	)
 
-	rows, err := db.Query(query.ToSQL(), query.Bindings()...)
+	rows, err := db.Query(query.ToSQL(), query.Bindings("Joe")...)
 	if err != nil {
 		log.Fatal(err)
 	}

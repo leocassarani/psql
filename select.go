@@ -21,6 +21,7 @@ func Select(exprs ...Expression) SelectQuery {
 type SelectQuery struct {
 	sel     selectClause
 	orderBy orderByClause
+	where   whereClause
 	groupBy groupByClause
 
 	params *Params
@@ -28,7 +29,7 @@ type SelectQuery struct {
 
 // OrderBy returns a copy of the SelectQuery s with an additional ORDER BY
 // clause containing the order expressions provided. If an ORDER BY clause
-// was already present, this operation will overwrite it.
+// was already present, this method will overwrite it.
 func (s SelectQuery) OrderBy(exprs ...OrderExpression) SelectQuery {
 	s.orderBy = orderByClause{exprs}
 	return s
@@ -36,9 +37,17 @@ func (s SelectQuery) OrderBy(exprs ...OrderExpression) SelectQuery {
 
 // GroupBy returns a copy of the SelectQuery s with an additional GROUP BY
 // clause containing the Expressions provided. If a GROUP BY clause was
-// already present, this operation will overwrite it.
+// already present, this method will overwrite it.
 func (s SelectQuery) GroupBy(exprs ...Expression) SelectQuery {
 	s.groupBy = groupByClause{exprs}
+	return s
+}
+
+// Where returns a copy of the SelectQuery s with an additional WHERE clause
+// containing the BooleanExpressions provided. If a WHERE clause was already
+// present, this method will overwrite it.
+func (s SelectQuery) Where(exprs ...BooleanExpression) SelectQuery {
+	s.where = whereClause{exprs}
 	return s
 }
 
@@ -64,6 +73,7 @@ func (s SelectQuery) clauses() []Clause {
 	return []Clause{
 		s.sel,
 		s.from(),
+		s.where,
 		s.groupBy,
 		s.orderBy,
 	}
@@ -87,6 +97,7 @@ func (s SelectQuery) from() Clause {
 func (s SelectQuery) relations() []string {
 	var rels []string
 	rels = append(rels, s.sel.Relations()...)
+	rels = append(rels, s.where.Relations()...)
 	rels = append(rels, s.groupBy.Relations()...)
 	rels = append(rels, s.orderBy.Relations()...)
 	return rels
@@ -146,6 +157,41 @@ func (f fromClause) ToSQLClause(*Params) string {
 	}
 
 	return fmt.Sprintf("FROM %s", strings.Join(f.rels, ", "))
+}
+
+type whereClause struct {
+	exprs []BooleanExpression
+}
+
+func (w whereClause) ToSQLClause(p *Params) string {
+	if len(w.exprs) == 0 {
+		return ""
+	}
+
+	conds := make([]string, len(w.exprs))
+	for i, expr := range w.exprs {
+		conds[i] = expr.ToSQLBoolean(p)
+	}
+
+	return fmt.Sprintf("WHERE %s", strings.Join(conds, " AND "))
+}
+
+func (w whereClause) Relations() []string {
+	var rels []string
+	for _, expr := range w.exprs {
+		rels = append(rels, expr.Relations()...)
+	}
+	return rels
+}
+
+// BooleanExpression is the interface representing an SQL expression that returns
+// a boolean value.
+//
+// ToSQLBoolean converts the BooleanExpression to an SQL representation. In most
+// cases, the implementation will be identical to ToSQLExpr().
+type BooleanExpression interface {
+	Expression
+	ToSQLBoolean(*Params) string
 }
 
 type groupByClause struct {

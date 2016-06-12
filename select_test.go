@@ -139,6 +139,15 @@ func TestSelectQuerySQL(t *testing.T) {
 			),
 			`SELECT "name", ("height" >= 180) FROM "users"`,
 		},
+		{
+			Select(
+				TableColumn("users", "height"),
+			).Where(
+				Eq(TableColumn("users", "name"), StringParam()),
+				NotEq(TableColumn("users", "city"), StringParam()),
+			),
+			`SELECT "height" FROM "users" WHERE ("name" = $1::text) AND ("city" <> $2::text)`,
+		},
 	}
 
 	for i, tc := range cases {
