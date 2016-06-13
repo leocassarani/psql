@@ -28,9 +28,9 @@ query := psql.Select(
   psql.Descending(psql.TableColumn("users", "height")),
 )
 
-// SELECT "name", "email" FROM "users" WHERE "name" <> 'Joe' ORDER BY "height"
-fmt.Println(query.ToSQL(), query.Bindings("Joe")...)
+// SELECT "name", "email" FROM "users" WHERE ("name" <> $1::text) ORDER BY "height"
+fmt.Println(query.ToSQL())
 
-// Run the query on a database connection.
-db.Query(query.ToSQL())
+// Run the query on a database connection, replacing $1 with "Joe".
+db.Query(query.ToSQL(), query.Bindings("Joe")...)
 ```
