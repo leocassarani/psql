@@ -156,6 +156,12 @@ func TestSelectQuerySQL(t *testing.T) {
 			),
 			`SELECT "height" FROM "users" WHERE ("name" = $1::text) AND ("city" <> $2::text) AND "height" IS NOT NULL`,
 		},
+		{
+			Select(
+				Now(),
+			),
+			`SELECT now()`,
+		},
 	}
 
 	for i, tc := range cases {
