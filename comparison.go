@@ -35,17 +35,6 @@ func GreaterThanOrEq(a, b Expression) comparison {
 	return comparison{a, b, gte}
 }
 
-type comparisonType string
-
-const (
-	eq  comparisonType = "="
-	neq                = "<>"
-	lt                 = "<"
-	lte                = "<="
-	gt                 = ">"
-	gte                = ">="
-)
-
 type comparison struct {
 	a, b     Expression
 	compType comparisonType
@@ -64,4 +53,34 @@ func (c comparison) Relations() []string {
 	rels = append(rels, c.a.Relations()...)
 	rels = append(rels, c.b.Relations()...)
 	return rels
+}
+
+type comparisonType int
+
+const (
+	eq comparisonType = iota
+	neq
+	lt
+	lte
+	gt
+	gte
+)
+
+func (c comparisonType) String() string {
+	switch c {
+	case eq:
+		return "="
+	case neq:
+		return "<>"
+	case lt:
+		return "<"
+	case lte:
+		return "<="
+	case gt:
+		return ">"
+	case gte:
+		return ">="
+	default:
+		panic("unknown comparisonType")
+	}
 }

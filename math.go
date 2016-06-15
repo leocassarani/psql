@@ -51,17 +51,6 @@ func Pow(a, b Expression) binaryOp {
 	return binaryOp{a, b, pow}
 }
 
-type binaryOpType string
-
-const (
-	plus   binaryOpType = "+"
-	minus               = "-"
-	times               = "*"
-	divide              = "/"
-	modulo              = "%"
-	pow                 = "^"
-)
-
 type binaryOp struct {
 	a, b   Expression
 	opType binaryOpType
@@ -76,4 +65,34 @@ func (o binaryOp) Relations() []string {
 	rels = append(rels, o.a.Relations()...)
 	rels = append(rels, o.b.Relations()...)
 	return rels
+}
+
+type binaryOpType int
+
+const (
+	plus binaryOpType = iota
+	minus
+	times
+	divide
+	modulo
+	pow
+)
+
+func (b binaryOpType) String() string {
+	switch b {
+	case plus:
+		return "+"
+	case minus:
+		return "-"
+	case times:
+		return "*"
+	case divide:
+		return "/"
+	case modulo:
+		return "%"
+	case pow:
+		return "^"
+	default:
+		panic("unknown binaryOpType")
+	}
 }

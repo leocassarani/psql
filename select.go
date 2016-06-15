@@ -256,13 +256,6 @@ func Descending(expr Expression) OrderExpression {
 	return OrderExpression{expr, desc}
 }
 
-type orderDirection string
-
-const (
-	asc  orderDirection = "ASC"
-	desc                = "DESC"
-)
-
 // An OrderExpression is each individual component of a SELECT query's
 // ORDER BY clause, specifying that the results of the query must be
 // sorted by a given SQL expression.
@@ -277,6 +270,24 @@ func (o OrderExpression) ToSQLOrder(p *Params) string {
 
 func (o OrderExpression) Relations() []string {
 	return o.expr.Relations()
+}
+
+type orderDirection int
+
+const (
+	asc orderDirection = iota
+	desc
+)
+
+func (o orderDirection) String() string {
+	switch o {
+	case asc:
+		return "ASC"
+	case desc:
+		return "DESC"
+	default:
+		panic("unknown orderDirection")
+	}
 }
 
 // Expression is the interface that represents any SQL expression that
@@ -393,11 +404,20 @@ func (stringLiteral) Relations() []string {
 	return nil
 }
 
-type dataType string
+type dataType int
 
 const (
-	textType dataType = "text"
+	textType dataType = iota
 )
+
+func (d dataType) String() string {
+	switch d {
+	case textType:
+		return "text"
+	default:
+		panic("unknown dataType")
+	}
+}
 
 // StringParam returns a free (unbound) parameter using the "text" type.
 func StringParam() freeParam {

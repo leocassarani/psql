@@ -2,15 +2,6 @@ package psql
 
 import "fmt"
 
-type aggregationType string
-
-const (
-	avg aggregationType = "AVG"
-	max                 = "MAX"
-	min                 = "MIN"
-	sum                 = "SUM"
-)
-
 // Avg returns an Expression representing a call to the AVG aggregate
 // function with the table column col as an argument.
 func Avg(col tableColumn) aggregateFunc {
@@ -46,4 +37,28 @@ func (f aggregateFunc) ToSQLExpr(p *Params) string {
 
 func (f aggregateFunc) Relations() []string {
 	return f.column.Relations()
+}
+
+type aggregationType int
+
+const (
+	avg aggregationType = iota
+	max
+	min
+	sum
+)
+
+func (a aggregationType) String() string {
+	switch a {
+	case avg:
+		return "AVG"
+	case max:
+		return "MAX"
+	case min:
+		return "MIN"
+	case sum:
+		return "SUM"
+	default:
+		panic("unknown aggregationType")
+	}
 }
