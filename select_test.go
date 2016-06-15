@@ -123,6 +123,13 @@ func TestSelectQuerySQL(t *testing.T) {
 		},
 		{
 			Select(
+				IsNull(TableColumn("users", "name")),
+				IsNotNull(TableColumn("users", "email")),
+			),
+			`SELECT "name" IS NULL, "email" IS NOT NULL FROM "users"`,
+		},
+		{
+			Select(
 				Eq(IntLiteral(42), IntLiteral(42)),
 				NotEq(IntLiteral(42), IntLiteral(21)),
 				LessThan(IntLiteral(21), IntLiteral(42)),
@@ -145,8 +152,9 @@ func TestSelectQuerySQL(t *testing.T) {
 			).Where(
 				Eq(TableColumn("users", "name"), StringParam()),
 				NotEq(TableColumn("users", "city"), StringParam()),
+				IsNotNull(TableColumn("users", "height")),
 			),
-			`SELECT "height" FROM "users" WHERE ("name" = $1::text) AND ("city" <> $2::text)`,
+			`SELECT "height" FROM "users" WHERE ("name" = $1::text) AND ("city" <> $2::text) AND "height" IS NOT NULL`,
 		},
 	}
 

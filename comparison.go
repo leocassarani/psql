@@ -84,3 +84,37 @@ func (c comparisonType) String() string {
 		panic("unknown comparisonType")
 	}
 }
+
+// IsNull returns an Expression comparing expr and NULL for equality.
+func IsNull(expr Expression) nullCheck {
+	return nullCheck{expr, false}
+}
+
+// IsNotNull returns an Expression comparing expr and NULL for inequality.
+func IsNotNull(expr Expression) nullCheck {
+	return nullCheck{expr, true}
+}
+
+type nullCheck struct {
+	expr    Expression
+	negated bool
+}
+
+func (c nullCheck) ToSQLBoolean(p *Params) string {
+	return c.ToSQLExpr(p)
+}
+
+func (c nullCheck) ToSQLExpr(p *Params) string {
+	return fmt.Sprintf("%s %s", c.expr.ToSQLExpr(p), c.operator())
+}
+
+func (c nullCheck) operator() string {
+	if c.negated {
+		return "IS NOT NULL"
+	}
+	return "IS NULL"
+}
+
+func (c nullCheck) Relations() []string {
+	return c.expr.Relations()
+}
