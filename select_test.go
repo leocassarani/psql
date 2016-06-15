@@ -200,3 +200,32 @@ func TestSelectQueryBindings(t *testing.T) {
 		}
 	}
 }
+
+func TestSelectQueryIdempotence(t *testing.T) {
+	cases := []SelectQuery{
+		Select(
+			TableColumn("users", "name"),
+			TableColumn("users", "email"),
+		),
+
+		Select(
+			StringLiteral("Hello"),
+			StringLiteral("World"),
+		),
+
+		Select(
+			StringLiteral("Hello"),
+			StringParam(),
+		).Where(
+			Eq(TableColumn("users", "name"), StringParam()),
+		),
+	}
+
+	for i, query := range cases {
+		// Check that calling ToSQL() repeatedly on the same query returns the same string.
+		want, got := query.ToSQL(), query.ToSQL()
+		if want != got {
+			t.Errorf("test case %d: expected %q, got %q", i+1, want, got)
+		}
+	}
+}

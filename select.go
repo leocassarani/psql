@@ -56,6 +56,10 @@ func (s SelectQuery) Where(exprs ...BooleanExpression) SelectQuery {
 func (s SelectQuery) ToSQL() string {
 	var parts []string
 
+	// Since ToSQL() may be called multiple times, we must reset the params
+	// so that we always start with a blank slate.
+	s.params.Reset()
+
 	for _, clause := range s.clauses() {
 		if part := clause.ToSQLClause(s.params); part != "" {
 			parts = append(parts, part)
@@ -382,6 +386,13 @@ func (p *Params) Values(inputs []interface{}) []interface{} {
 	}
 
 	return values
+}
+
+func (p *Params) Reset() {
+	if p.counter > 0 {
+		p.counter = 0
+		p.values = make(map[int]interface{})
+	}
 }
 
 // StringLiteral returns a text literal that will be replaced with str
