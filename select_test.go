@@ -162,6 +162,14 @@ func TestSelectQuerySQL(t *testing.T) {
 			),
 			`SELECT now()`,
 		},
+		{
+			Select(
+				DatePart(DayField, TableColumn("animals", "birthdate")),
+				DatePart(MonthField, TableColumn("animals", "birthdate")),
+				DatePart(YearField, Now()),
+			),
+			`SELECT date_part('day', "birthdate"), date_part('month', "birthdate"), date_part('year', now()) FROM "animals"`,
+		},
 	}
 
 	for i, tc := range cases {
