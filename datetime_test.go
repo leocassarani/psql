@@ -100,3 +100,70 @@ func TestDatePart(t *testing.T) {
 		}
 	}
 }
+
+func TestDateTrunc(t *testing.T) {
+	cases := []struct {
+		precision DatePrecision
+		sql       string
+	}{
+		{
+			MicrosecondsPrecision,
+			`date_trunc('microseconds', now())`,
+		},
+		{
+			MillisecondsPrecision,
+			`date_trunc('milliseconds', now())`,
+		},
+		{
+			SecondPrecision,
+			`date_trunc('second', now())`,
+		},
+		{
+			MinutePrecision,
+			`date_trunc('minute', now())`,
+		},
+		{
+			HourPrecision,
+			`date_trunc('hour', now())`,
+		},
+		{
+			DayPrecision,
+			`date_trunc('day', now())`,
+		},
+		{
+			WeekPrecision,
+			`date_trunc('week', now())`,
+		},
+		{
+			MonthPrecision,
+			`date_trunc('month', now())`,
+		},
+		{
+			QuarterPrecision,
+			`date_trunc('quarter', now())`,
+		},
+		{
+			YearPrecision,
+			`date_trunc('year', now())`,
+		},
+		{
+			DecadePrecision,
+			`date_trunc('decade', now())`,
+		},
+		{
+			CenturyPrecision,
+			`date_trunc('century', now())`,
+		},
+		{
+			MillenniumPrecision,
+			`date_trunc('millennium', now())`,
+		},
+	}
+
+	for i, tc := range cases {
+		sql := DateTrunc(tc.precision, Now()).ToSQLExpr(nil)
+		if sql != tc.sql {
+			t.Errorf("text case %d: expected %q, got %q", i+1, tc.sql, sql)
+		}
+	}
+}

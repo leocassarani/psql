@@ -170,6 +170,15 @@ func TestSelectQuerySQL(t *testing.T) {
 			),
 			`SELECT date_part('day', "birthdate"), date_part('month', "birthdate"), date_part('year', now()) FROM "animals"`,
 		},
+		{
+			Select(
+				DateTrunc(DayPrecision, TableColumn("users", "signup_date")),
+				Max(TableColumn("users", "height")),
+			).GroupBy(
+				DateTrunc(DayPrecision, TableColumn("users", "signup_date")),
+			),
+			`SELECT date_trunc('day', "signup_date"), MAX("height") FROM "users" GROUP BY date_trunc('day', "signup_date")`,
+		},
 	}
 
 	for i, tc := range cases {

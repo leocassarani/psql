@@ -112,3 +112,73 @@ func (d DateField) String() string {
 		panic("unknown DateField")
 	}
 }
+
+// DateTrunc returns an Expression representing a call to the date/time
+// function date_trunc(), which truncates expr to the given precision.
+func DateTrunc(precision DatePrecision, expr Expression) dateTrunc {
+	return dateTrunc{precision, expr}
+}
+
+type dateTrunc struct {
+	precision DatePrecision
+	expr      Expression
+}
+
+func (d dateTrunc) ToSQLExpr(p *Params) string {
+	return fmt.Sprintf("date_trunc('%s', %s)", d.precision, d.expr.ToSQLExpr(p))
+}
+
+func (d dateTrunc) Relations() []string {
+	return d.expr.Relations()
+}
+
+type DatePrecision int
+
+const (
+	MicrosecondsPrecision DatePrecision = iota
+	MillisecondsPrecision
+	SecondPrecision
+	MinutePrecision
+	HourPrecision
+	DayPrecision
+	WeekPrecision
+	MonthPrecision
+	QuarterPrecision
+	YearPrecision
+	DecadePrecision
+	CenturyPrecision
+	MillenniumPrecision
+)
+
+func (d DatePrecision) String() string {
+	switch d {
+	case MicrosecondsPrecision:
+		return "microseconds"
+	case MillisecondsPrecision:
+		return "milliseconds"
+	case SecondPrecision:
+		return "second"
+	case MinutePrecision:
+		return "minute"
+	case HourPrecision:
+		return "hour"
+	case DayPrecision:
+		return "day"
+	case WeekPrecision:
+		return "week"
+	case MonthPrecision:
+		return "month"
+	case QuarterPrecision:
+		return "quarter"
+	case YearPrecision:
+		return "year"
+	case DecadePrecision:
+		return "decade"
+	case CenturyPrecision:
+		return "century"
+	case MillenniumPrecision:
+		return "millennium"
+	default:
+		panic("unknown DatePrecision")
+	}
+}
